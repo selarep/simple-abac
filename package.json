@@ -1,0 +1,64 @@
+{
+  "name": "simple-abac",
+  "version": "1.0.0",
+  "description": "Simple abac for Node.js",
+  "main": "dist/index.js",
+  "jest": {
+    "roots": [
+      "<rootDir>"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "testEnvironment": "node",
+    "testEnvironmentOptions": {
+      "NODE_ENV": "test"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/selarep/simple-abac.git"
+  },
+  "keywords": [
+    "abac",
+    "simple-abac",
+    "role",
+    "control",
+    "access",
+    "allow",
+    "can",
+    "permission"
+  ],
+  "author": {
+    "name": "Javier Perales Gran",
+    "email": "jperalesteleco@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/selarep/simple-abac/issues"
+  },
+  "homepage": "https://github.com/selarep/simple-abac#readme",
+  "devDependencies": {
+    "@types/jest": "^23.0.2",
+    "@types/lodash": "^4.14.109",
+    "jest": "^23.1.0",
+    "ts-jest": "^22.4.6",
+    "typescript": "^2.9.1"
+  },
+  "dependencies": {
+    "auto-bind": "^1.2.0",
+    "lodash": "^4.17.10"
+  }
+}
