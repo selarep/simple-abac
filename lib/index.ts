@@ -2,6 +2,7 @@ import * as autoBind from 'auto-bind';
 import * as _ from 'lodash';
 import { toArray } from './toArray';
 import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, SimpleAbacTargets, SimpleAbacCondition, ISimpleAbacAbilities } from './interfaces';
+import { Permission } from './permission';
 
 /** Class that contains the definitions of abilities in our application. */
 export class SimpleAbac {
@@ -125,47 +126,5 @@ export class SimpleAbac {
       attributes.except = nothingModeExcept;
     }
     return attributes;
-  }
-}
-
-/** Class for definition of a permission. */
-export class Permission {
-  /** States if the action could be performed or not. */
-  granted: boolean;
-  /** Defines in which attributes of target could the action be performed */
-  attributes: ISimpleAbacAttributes;
-
-  /**
-   * Create a permission.
-   * @param granted
-   * @param attributes 
-   */
-  constructor(granted: boolean, attributes: ISimpleAbacAttributes) {
-    this.granted = granted;
-    this.attributes = attributes;
-  }
-
-  /**
-   * Filters a target object attributes defined in 'attributes' property.
-   * Returns a new object with only the allowed target attributes.
-   * @param obj 
-   */
-  filter(obj: any): any {
-    if (this.attributes.mode === 'all') {
-      if (!_.isNil(this.attributes.except)) {
-        this.attributes.except.forEach(attribute => {
-          delete obj[attribute];
-        });
-      }
-      return obj;
-    } else if (this.attributes.mode === 'nothing') {
-      const filteredObj: any = {};
-      if (!_.isNil(this.attributes.except)) {
-        this.attributes.except.forEach(attribute => {
-          filteredObj[attribute] = obj[attribute];
-        });
-      }
-      return filteredObj;
-    }
   }
 }
