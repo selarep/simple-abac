@@ -1,7 +1,7 @@
-import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, ISimpleAbacAbilities } from './interfaces';
+import { ISimpleAbacAttributes, SimpleAbacAction, ISimpleAbacAbilities } from './interfaces';
 /** Class that contains the definitions of abilities in our application. */
 export declare class SimpleAbac {
-    abilities: ISimpleAbacAbility[];
+    private abilities;
     /**
      * Create a SimpleAbac.
      */

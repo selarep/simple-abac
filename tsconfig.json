@@ -8,5 +8,12 @@
     "declaration": true,
     "outDir": "./dist",
     "strict": false
-  }
+  },
+  "include": [
+    "lib/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "test"
+  ]
 }
