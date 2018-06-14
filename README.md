@@ -91,7 +91,7 @@ Asking if any can read post:
 
 Asking if editor with id: 1 can delete a post written by editor with id: 3:
 ```typescript
-  const permission = await abac.can({ id: 1, role: 'editor' }, 'read', 'post', {authorId: 3, ...});
+  const permission = await abac.can({ id: 1, role: 'editor' }, 'delete', 'post', {authorId: 3, ...});
   /* 
   {
     granted: false,
@@ -104,7 +104,7 @@ Asking if editor with id: 1 can delete a post written by editor with id: 3:
 
 Asking if editor with id: 3 can delete a post written by editor with id: 3:
 ```typescript
-  const permission = await abac.can({ id: 3, role: 'editor' }, 'read', 'post', {authorId: 3, ...});
+  const permission = await abac.can({ id: 3, role: 'editor' }, 'delete', 'post', {authorId: 3, ...});
   /* 
   {
     granted: true,
