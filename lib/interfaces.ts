@@ -24,3 +24,8 @@ export interface ISimpleAbacAbilities {
   attributes?: ISimpleAbacAttributes;
   condition?: SimpleAbacCondition;
 }
+
+export interface ISimpleAbacRoleExtension {
+  originRole: string,
+  destinationRole: string,
+}

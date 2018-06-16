@@ -1,4 +1,5 @@
 import { ISimpleAbacAttributes } from './interfaces';
+import _ = require('lodash');
 
 /** Class for definition of a permission. */
 export class Permission {

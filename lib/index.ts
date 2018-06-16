@@ -1,12 +1,13 @@
 import * as autoBind from 'auto-bind';
 import * as _ from 'lodash';
 import { toArray } from './toArray';
-import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, SimpleAbacTargets, SimpleAbacCondition, ISimpleAbacAbilities } from './interfaces';
+import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, SimpleAbacTargets, SimpleAbacCondition, ISimpleAbacAbilities, ISimpleAbacRoleExtension } from './interfaces';
 import { Permission } from './permission';
 
 /** Class that contains the definitions of abilities in our application. */
 export class SimpleAbac {
   private abilities: ISimpleAbacAbility[] = [];
+  private extensions: ISimpleAbacRoleExtension[] = [];
   
   /**
    * Create a SimpleAbac.
@@ -48,7 +49,14 @@ export class SimpleAbac {
 
     const abilities: ISimpleAbacAbility[] = this.abilities
     .filter(ability => {
-      return user && (user.role === ability.role) || ability.role === 'all' || ability.role === 'any';
+      const extendedRoles = this.extensions
+      .filter(extension => {
+        return extension.originRole === ability.role;
+      })
+      .map(extension => {
+        return extension.destinationRole;
+      });
+      return user && (user.role === ability.role || extendedRoles.find(role => role === user.role)) || ability.role === 'all' || ability.role === 'any';
     })
     .filter(ability => {
       return target === ability.target || ability.target === 'all' || ability.target === 'any';
@@ -70,6 +78,16 @@ export class SimpleAbac {
     const granted: boolean = filteredAbilities.length > 0;
     const attributes: ISimpleAbacAttributes = this.attributesComposition(filteredAbilities);
     return new Permission(granted, attributes);
+  }
+
+  /**
+   * Makes destination role to be an extension of origin role.
+   * Then, destination role will be allowed to do anything that origin role can.
+   * @param origin 
+   * @param destination 
+   */
+  extendRole(origin: string, destination: string) {
+    this.extensions.push({originRole: origin, destinationRole: destination});
   }
 
   /**
