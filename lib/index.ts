@@ -56,7 +56,8 @@ export class SimpleAbac {
       .map(extension => {
         return extension.destinationRole;
       });
-      return user && (user.role === ability.role || extendedRoles.find(role => role === user.role)) || ability.role === 'all' || ability.role === 'any';
+      return user && (user.role === ability.role) || ability.role === 'all' || ability.role === 'any'
+                      || extendedRoles.find(role => (role === user.role || role === 'any' || role === 'all'));
     })
     .filter(ability => {
       return target === ability.target || ability.target === 'all' || ability.target === 'any';
