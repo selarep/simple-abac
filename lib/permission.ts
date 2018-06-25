@@ -1,5 +1,6 @@
 import { ISimpleAbacAttributes } from './interfaces';
 import _ = require('lodash');
+import { toArray } from './toArray';
 
 /** Class for definition of a permission. */
 export class Permission {
@@ -23,22 +24,31 @@ export class Permission {
    * Returns a new object with only the allowed target attributes.
    * @param obj 
    */
-  filter(obj: any): any {
-    if (this.attributes.mode === 'all') {
-      if (!_.isNil(this.attributes.except)) {
-        this.attributes.except.forEach(attribute => {
-          delete obj[attribute];
-        });
+  filter(obj: any | any[]): any {
+    obj = toArray(obj);
+    const filteredArray = obj.map(element => {
+      if (this.attributes.mode === 'all') {
+        if (!_.isNil(this.attributes.except)) {
+          this.attributes.except.forEach(attribute => {
+            element[attribute] = null;
+            delete element[attribute];
+          });
+        }
+        return element;
+      } else if (this.attributes.mode === 'nothing') {
+        const filteredObj: any = {};
+        if (!_.isNil(this.attributes.except)) {
+          this.attributes.except.forEach(attribute => {
+            filteredObj[attribute] = element[attribute];
+          });
+        }
+        return filteredObj;
       }
-      return obj;
-    } else if (this.attributes.mode === 'nothing') {
-      const filteredObj: any = {};
-      if (!_.isNil(this.attributes.except)) {
-        this.attributes.except.forEach(attribute => {
-          filteredObj[attribute] = obj[attribute];
-        });
-      }
-      return filteredObj;
+    });
+    if (filteredArray.length === 1) {
+      return filteredArray[0];
+    } else {
+      return filteredArray;
     }
   }
 }
