@@ -25,30 +25,32 @@ export class Permission {
    * @param obj 
    */
   filter(obj: any | any[]): any {
-    obj = toArray(obj);
-    const filteredArray = obj.map(element => {
-      if (this.attributes.mode === 'all') {
-        if (!_.isNil(this.attributes.except)) {
-          this.attributes.except.forEach(attribute => {
-            element[attribute] = null;
-            delete element[attribute];
-          });
-        }
-        return element;
-      } else if (this.attributes.mode === 'nothing') {
-        const filteredObj: any = {};
-        if (!_.isNil(this.attributes.except)) {
-          this.attributes.except.forEach(attribute => {
-            filteredObj[attribute] = element[attribute];
-          });
-        }
-        return filteredObj;
-      }
-    });
-    if (filteredArray.length === 1) {
-      return filteredArray[0];
+    if (Array.isArray(obj)) {
+      return obj.map(element => {
+        return this._filterElement(element);
+      });
     } else {
-      return filteredArray;
+      return this._filterElement(obj);
+    }
+  }
+
+  private _filterElement(element: any) {
+    if (this.attributes.mode === 'all') {
+      if (!_.isNil(this.attributes.except)) {
+        this.attributes.except.forEach(attribute => {
+          element[attribute] = null;
+          delete element[attribute];
+        });
+      }
+      return element;
+    } else if (this.attributes.mode === 'nothing') {
+      const filteredObj: any = {};
+      if (!_.isNil(this.attributes.except)) {
+        this.attributes.except.forEach(attribute => {
+          filteredObj[attribute] = element[attribute];
+        });
+      }
+      return filteredObj;
     }
   }
 }
