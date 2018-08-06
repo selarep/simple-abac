@@ -41,7 +41,7 @@ export class SimpleAbac {
    * @param targetOptions - An object which contains target options. Example: { id: 2482, name: 'Jack', role: 'admin' }.
    */
   async can(
-    user: any,
+    user: { role?: string | string[], userId?: number | string, [key: string]: any },
     action: SimpleAbacAction,
     target: string,
     targetOptions: any,
@@ -49,15 +49,7 @@ export class SimpleAbac {
 
     const abilities: ISimpleAbacAbility[] = this.abilities
     .filter(ability => {
-      const extendedRoles = this.extensions
-      .filter(extension => {
-        return extension.originRole === ability.role;
-      })
-      .map(extension => {
-        return extension.destinationRole;
-      });
-      return user && (user.role === ability.role) || ability.role === 'all' || ability.role === 'any'
-                      || extendedRoles.find(role => (role === user.role || role === 'any' || role === 'all'));
+      return this.userCanAbility(user, ability);
     })
     .filter(ability => {
       return target === ability.target || ability.target === 'all' || ability.target === 'any';
@@ -145,5 +137,27 @@ export class SimpleAbac {
       attributes.except = nothingModeExcept;
     }
     return attributes;
+  }
+
+  private userCanAbility(user: any, ability: ISimpleAbacAbility): boolean {
+    const extendedRoles = this.extensions
+      .filter(extension => {
+        return extension.originRole === ability.role;
+      })
+      .map(extension => {
+        return extension.destinationRole;
+      });
+    if (ability.role === 'all' || ability.role === 'any') {
+      return true;
+    }
+    if (user) {
+      const userRole = toArray(user.role);
+      for (const role of userRole) {
+        if ((role === ability.role) || extendedRoles.find(role => (role === role || role === 'any' || role === 'all')) !== undefined) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
