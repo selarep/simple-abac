@@ -41,7 +41,7 @@ export class SimpleAbac {
    * @param targetOptions - An object which contains target options. Example: { id: 2482, name: 'Jack', role: 'admin' }.
    */
   async can(
-    user: { role?: string | string[], userId?: number | string, [key: string]: any },
+    user: { role?: string | string[], userId?: number | string, [key: string]: any } | undefined,
     action: SimpleAbacAction,
     target: string,
     targetOptions: any,
