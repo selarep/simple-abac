@@ -1,7 +1,7 @@
 import * as autoBind from 'auto-bind';
 import * as _ from 'lodash';
 import { toArray } from './toArray';
-import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, SimpleAbacTargets, SimpleAbacCondition, ISimpleAbacAbilities, ISimpleAbacRoleExtension, SimpleAbacUser } from './interfaces';
+import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, ISimpleAbacAbilities, ISimpleAbacRoleExtension, SimpleAbacUser } from './interfaces';
 import { Permission } from './permission';
 
 /** Class that contains the definitions of abilities in our application. */
@@ -61,7 +61,7 @@ export class SimpleAbac {
     const filteredAbilities: ISimpleAbacAbility[] = [];
     for (const ability of abilities) {
       if (!_.isNil(ability.condition)) {
-        if (await ability.condition(user && user.userId, targetOptions)) {
+        if (user && user.userId && await ability.condition(user.userId, targetOptions)) {
           filteredAbilities.push(ability);
         }
       } else {

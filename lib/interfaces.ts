@@ -1,6 +1,6 @@
 export type SimpleAbacAction = 'all' | 'any' | 'create' | 'read' | 'update' | 'delete' | string;
 export type SimpleAbacTargets = 'all' | 'any' | string | string[];
-export type SimpleAbacCondition = ((userId: number | string | undefined, targetOptions: any) => boolean | Promise<boolean>);
+export type SimpleAbacCondition = ((userId: number | string, targetOptions: any) => boolean | Promise<boolean>);
 export type SimpleAbacUser = { role?: string | string[], userId?: number | string, [key: string]: any } | undefined;
 
 export interface ISimpleAbacAttributes {
