@@ -57,4 +57,20 @@ describe('SimpleAbac module', () => {
     const permission = await simpleAbac.can({ role: 'admin' }, 'create', 'post', {});
     expect(permission.granted).toBe(true);
   });
+
+  // it('should work ok extended roles', async () => {
+  //   simpleAbac.extendRole('admin', 'superadmin');
+  //   simpleAbac.extendRole('user', 'admin');
+  //   // simpleAbac.extendRole('superadmin', 'user');
+  //   expect(simpleAbac.getExtendedRoles('superadmin')).toEqual(['admin', 'user']);
+  // });
+
+  // it('should work ok extended roles', async () => {
+  //   simpleAbac.extendRole('admin', 'superadmin');
+  //   simpleAbac.extendRole('user', 'admin');
+  //   simpleAbac.extendRole('guay', 'superguay');
+  //   // simpleAbac.extendRole('superadmin', 'user');
+  //   expect(simpleAbac.getExtendedRolesFromArray(['superadmin', 'superguay'])).toEqual(['admin', 'user', 'guay']);
+  // });
+
 });

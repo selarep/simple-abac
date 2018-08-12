@@ -1,7 +1,7 @@
 import * as autoBind from 'auto-bind';
 import * as _ from 'lodash';
 import { toArray } from './toArray';
-import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, SimpleAbacTargets, SimpleAbacCondition, ISimpleAbacAbilities, ISimpleAbacRoleExtension } from './interfaces';
+import { ISimpleAbacAttributes, ISimpleAbacAbility, SimpleAbacAction, SimpleAbacTargets, SimpleAbacCondition, ISimpleAbacAbilities, ISimpleAbacRoleExtension, SimpleAbacUser } from './interfaces';
 import { Permission } from './permission';
 
 /** Class that contains the definitions of abilities in our application. */
@@ -41,7 +41,7 @@ export class SimpleAbac {
    * @param targetOptions - An object which contains target options. Example: { id: 2482, name: 'Jack', role: 'admin' }.
    */
   async can(
-    user: { role?: string | string[], userId?: number | string, [key: string]: any } | undefined,
+    user: SimpleAbacUser,
     action: SimpleAbacAction,
     target: string,
     targetOptions: any,
@@ -49,19 +49,19 @@ export class SimpleAbac {
 
     const abilities: ISimpleAbacAbility[] = this.abilities
     .filter(ability => {
-      return this.userCanAbility(user, ability);
-    })
-    .filter(ability => {
       return target === ability.target || ability.target === 'all' || ability.target === 'any';
     })
     .filter(ability => {
       return action === ability.action || ability.action === 'all' || ability.action === 'any';
+    })
+    .filter(ability => {
+      return this.userCanAbility(user, ability);
     });
 
     const filteredAbilities: ISimpleAbacAbility[] = [];
     for (const ability of abilities) {
       if (!_.isNil(ability.condition)) {
-        if (await ability.condition(user && user.id, targetOptions)) {
+        if (await ability.condition(user && user.userId, targetOptions)) {
           filteredAbilities.push(ability);
         }
       } else {
@@ -74,20 +74,25 @@ export class SimpleAbac {
   }
 
   /**
-   * Makes destination role to be an extension of origin role.
-   * Then, destination role will be allowed to do anything that origin role can.
-   * @param origin 
-   * @param destination 
+   * Makes inheritor role to be an extension of parent role.
+   * Then, inheritor role will be allowed to do anything that parent role can.
+   * This function could be invoked in any moment of lifecycle. 
+   * It will apply to already defined and future abilities.
+   * It applies deep inheritance, so if you define superadmin inheriting admin,
+   * and admin inheriting user, superadmin will inherit from admin and also from user
+   * and so on.
+   * @param parent
+   * @param inheritor
    */
-  extendRole(origin: string, destination: string) {
-    this.extensions.push({originRole: origin, destinationRole: destination});
+  extendRole(parent: string, inheritor: string) {
+    this.extensions.push({parentRole: parent, inheritorRole: inheritor});
   }
 
   /**
    * This function returns the less restrictive set of attributes 
    * that results on compossing the abilities passed.
-   * Example: if one attribute let access 'all' except ['passwordHash'], and another one let access
-   * 'nothing' except ['userId', 'passwordHash'], the attributes result will be 'all' except ['passwordHash'].
+   * Example: if one attribute let access 'all' except ['passwordHash', 'role'], and another one let access
+   * 'nothing' except ['userId', 'role'], the attributes result will be 'all' except ['passwordHash'].
    * Another example: if one attribute let access 'all' except ['passwordHash'], and another one let access
    * 'all' except ['userId'], the attributes result will be 'all' except [], because both exclussions are inclussions
    * in other ability definitions.
@@ -139,25 +144,55 @@ export class SimpleAbac {
     return attributes;
   }
 
-  private userCanAbility(user: any, ability: ISimpleAbacAbility): boolean {
-    const extendedRoles = this.extensions
-      .filter(extension => {
-        return extension.originRole === ability.role;
-      })
-      .map(extension => {
-        return extension.destinationRole;
-      });
+  private userCanAbility(user: SimpleAbacUser, ability: ISimpleAbacAbility): boolean {
+
     if (ability.role === 'all' || ability.role === 'any') {
       return true;
     }
     if (user) {
       const userRole = toArray(user.role);
+      const extendedRoles = this.getExtendedRolesFromArray(userRole);
       for (const role of userRole) {
-        if ((role === ability.role) || extendedRoles.find(role => (role === role || role === 'any' || role === 'all')) !== undefined) {
+        if ((role === ability.role) || extendedRoles.find(role => (role === ability.role || role === 'any' || role === 'all')) !== undefined) {
           return true;
         }
       }
     }
     return false;
+  }
+
+  private getExtendedRoles(userRole: string) {
+    let extendedRoles: string[] = [];
+    let currentRoles: string[] = [userRole];
+    let finished: boolean = false;
+    
+    while (!finished) {
+      currentRoles = this.extensions
+        .filter(extension => {
+          return currentRoles.find(role => {
+            return extension.inheritorRole === role;
+          });
+        })
+        .map(extension => {
+          return extension.parentRole;
+        });
+      extendedRoles.push(...currentRoles);
+      if (currentRoles[0] === undefined) {
+        finished = true;
+      }
+      if (currentRoles.find(role => role === userRole)) {
+        // If we get the userRole, we have ciclical hierarchy... Bad news...
+        throw new Error(`Ciclical hierarchy found on ${userRole} role.`);
+      }
+    }
+    return extendedRoles;
+  }
+
+  private getExtendedRolesFromArray(userRoles: string[]) {
+    return _.uniq(
+      userRoles
+        .map(userRole => this.getExtendedRoles(userRole))
+        .reduce((prev, curr) => prev.concat(curr))
+    );
   }
 }
