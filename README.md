@@ -1,5 +1,6 @@
-# This project is not beeing mantained at this time. 
-# Please be careful if you use it. Do on your own responsibility.
+# Not maintaining advice
+This project is not beeing mantained at this time. 
+Please be careful if you use it. Do on your own responsibility.
 
 # simple-abac
 Node.js package that makes attribute based access control (ABAC) simple.
